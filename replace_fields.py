@@ -2,12 +2,18 @@ import os
 import re
 
 # Caminho do diretório onde estão seus arquivos .pas e .dfm
-PROJECT_DIRECTORY = "D:\\Desenvolvimento\\Delphi\\Projetos\\05 - Alexandria\\ATISolution\\App-ERP"
+PROJECT_DIRECTORY = "D:/Desenvolvimento/Delphi/Projetos/05 - Alexandria/ATISolution/App-ERP"
 
 # Função para ler e substituir os tipos nos arquivos
 def replace_field_types(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        content = file.read()
+    # Tenta abrir usando UTF-8
+    try:
+        with open(file_path, 'r', encoding='utf-8-sig') as file:
+            content = file.read()
+    except UnicodeDecodeError:
+        # Se falhar, tenta com Latin-1
+        with open(file_path, 'r', encoding='latin-1') as file:
+            content = file.read()
 
     # Regex para identificar os campos no DFM ou no .pas
     # Substituir TBCDField por TFloatField
@@ -16,9 +22,10 @@ def replace_field_types(file_path):
     content = re.sub(r'\bTFMTBCDField\b', 'TFloatField', content)
 
     # Substituir outros tipos se necessário (exemplo para TCurrencyField, TDateTimeField)
-    # content = re.sub(r'\b<OldType>\b', '<NewType>', content)
+    content = re.sub(r'\bTDateField\b', 'TDatetimeField', content)
 
-    with open(file_path, 'w', encoding='utf-8') as file:
+    # Escrever o arquivo novamente em UTF-8 para preservar todos os caracteres
+    with open(file_path, 'w', encoding='utf-8-sig') as file:
         file.write(content)
 
 # Função para percorrer o diretório e processar os arquivos .dfm e .pas
